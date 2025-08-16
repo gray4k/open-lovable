@@ -3,6 +3,7 @@ import { createGroq } from '@ai-sdk/groq';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createOpenAI as createDeepSeek } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import type { FileManifest } from '@/types/file-manifest';
@@ -19,6 +20,16 @@ const anthropic = createAnthropic({
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   baseURL: process.env.OPENAI_BASE_URL,
+});
+
+const deepseek = createDeepSeek({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: 'https://api.deepseek.com/v1',
+});
+
+const qwen = createOpenAI({
+  apiKey: process.env.QWEN_API_KEY,
+  baseURL: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
 });
 
 // Schema for the AI's search plan - not file selection!
@@ -103,6 +114,10 @@ export async function POST(request: NextRequest) {
       } else {
         aiModel = openai(model.replace('openai/', ''));
       }
+    } else if (model.startsWith('deepseek/')) {
+      aiModel = deepseek(model.replace('deepseek/', ''));
+    } else if (model.startsWith('qwen/')) {
+      aiModel = qwen(model.replace('qwen/', ''));
     } else if (model.startsWith('google/')) {
       aiModel = createGoogleGenerativeAI(model.replace('google/', ''));
     } else {
